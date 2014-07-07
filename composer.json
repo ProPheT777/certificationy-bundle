@@ -1,0 +1,26 @@
+{
+    "name": "certificationy/certy-bundle",
+    "description": "Certy Bundle",
+    "keywords": ["Certification", "Certy", "Certificationy"],
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Johann Saunier",
+            "email": "johann_27@hotmail.fr"
+        }
+    ],
+    "require":
+    {
+        "php": ">=5.3.0",
+        "prophet777/certy": "dev-master",
+        "symfony/framework-bundle": "~2.3",
+        "sylius/flow-bundle": "~0.10"
+    },
+    "autoload": {
+        "psr-4": { "Certificationy\\Bundle\\Certy\\": "" }
+    },
+    "autoload-dev": {
+        "psr-4": { "Certificationy\\Bundle\\Certy\\Tests\\": "Tests/" }
+    }
+}

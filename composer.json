@@ -24,6 +24,7 @@
         "psr-4": { "Certificationy\\Bundle\\Certy\\Tests\\": "Tests/" }
     },
     "extra": {
+        "minimum-stability": "dev",
         "branch-alias": {
             "dev-master": "1.0.x-dev"
         }

@@ -10,12 +10,11 @@
 namespace Certificationy\Bundle\CertyBundle\Form\Handler;
 
 use Certificationy\Component\Certy\Events\CertificationEvents;
-use Certificationy\Component\Certy\Events\CertificationSubmissionEvent;
+use Certificationy\Component\Certy\Events\CustomContextEvent;
 use Certificationy\Component\Certy\Model\Certification;
-use Certificationy\Component\Certy\Model\ResultCertification;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class CertificationHandler extends Handler
+class ContextHandler extends Handler
 {
     /**
      * @var EventDispatcherInterface
@@ -32,27 +31,25 @@ class CertificationHandler extends Handler
 
     /**
      * @param Certification $certification
+     *
+     * @return bool
      */
     public function process(Certification $certification)
     {
-        $resultCertification = new ResultCertification();
-        $this->createForm($resultCertification, array('certification' => $certification));
+        $this->createForm($certification->getContext(), array('certification' => $certification));
 
         return $this->handle('POST');
     }
 
     /**
-     * @param ResultCertification $data
+     * @param Certification $data
+     *
+     * @return bool|void
      */
-    public function onSuccess($data)
+    protected function onSuccess($data)
     {
-        $certification = $this->form->getConfig()->getOption('certification');
-        $certification->setResult($data);
-
-        $this->eventDispatcher->dispatch(
-            CertificationEvents::CERTIFICATION_SUBMISSION,
-            $event = new CertificationSubmissionEvent($certification)
-        );
+        $event = new CustomContextEvent($this->form->getConfig()->getOption('certification'));
+        $this->eventDispatcher->dispatch(CertificationEvents::CERTIFICATION_CUSTOM_CONTEXT, $event);
 
         return $event->getCertification();
     }

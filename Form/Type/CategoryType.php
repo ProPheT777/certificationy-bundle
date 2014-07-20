@@ -9,15 +9,12 @@
 
 namespace Certificationy\Bundle\CertyBundle\Form\Type;
 
-use Certificationy\Component\Certy\Calculator\Calculator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\ChoiceList\SimpleChoiceList;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
-class AnswerType extends AbstractType
+class CategoryType extends AbstractType
 {
     /**
      * @param OptionsResolverInterface $resolver
@@ -27,43 +24,40 @@ class AnswerType extends AbstractType
         $resolver->setDefaults(array(
             'multiple' => true,
             'expanded' => true,
-            'property_path' => 'results',
-            'choice_list' => $this->getAnswersList()
+            'choice_list' => $this->getCategoryList()
         ));
 
         $resolver->setRequired(array(
-            'question'
+            'certification'
         ));
 
         $resolver->setAllowedTypes(array(
-            'question' => array('Certificationy\Component\Certy\Model\Question')
+            'certification' => array('Certificationy\Component\Certy\Model\Certification')
         ));
     }
 
     /**
      * @return callable
      */
-    public function getAnswersList()
+    protected function getCategoryList()
     {
         return function (Options $options) {
-            $question = $options->get('question');
-            $choices = array();
-            foreach ($question->getAnswers() as $answer) {
-                $choices[Calculator::getHash($question->getCategory(), $question, $answer)] = $answer->getLabel();
+            $categoryBuffer = array();
+
+            foreach ($options->get('certification')->getCategories() as $category) {
+                $categoryBuffer[$category->getName()] = $category->getLabel();
             }
 
-            return new SimpleChoiceList($choices);
+            return new SimpleChoiceList($categoryBuffer);
         };
     }
 
     /**
-     * @param FormView      $view
-     * @param FormInterface $form
-     * @param array         $options
+     * @return string
      */
-    public function finishView(FormView $view, FormInterface $form, array $options)
+    public function getName()
     {
-        $view->vars['label'] = $options['question']->getLabel();
+        return 'certification_category';
     }
 
     /**
@@ -72,13 +66,5 @@ class AnswerType extends AbstractType
     public function getParent()
     {
         return 'choice';
-    }
-
-    /**
-     * @return string
-     */
-    public function getName()
-    {
-        return 'certification_answer';
     }
 }

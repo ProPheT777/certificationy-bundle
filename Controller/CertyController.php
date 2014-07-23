@@ -10,6 +10,8 @@
 namespace Certificationy\Bundle\CertyBundle\Controller;
 
 use Certificationy\Bundle\CertyBundle\Exception\CheaterException;
+use Certificationy\Component\Certy\Events\CertificationEvent;
+use Certificationy\Component\Certy\Events\CertificationEvents;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,6 +22,9 @@ class CertyController extends Controller
 {
     /**
      * @param Request $request
+     * @param string  $name
+     *
+     * @return RedirectResponse|Response
      */
     public function guidelinesAction(Request $request, $name)
     {
@@ -31,6 +36,9 @@ class CertyController extends Controller
         if ($contextHandler->process($certification)) {
             $request->getSession()->set('certification', $certification);
             $router = $this->container->get('router');
+
+            $eventDispatcher = $this->container->get('event_dispatcher');
+            $eventDispatcher->dispatch(CertificationEvents::CERTIFICATION_START, new CertificationEvent($certification));
 
             return new RedirectResponse($router->generate('certification_test', array('name' => $name)));
         }
@@ -44,7 +52,9 @@ class CertyController extends Controller
     /**
      * @param Request $request
      * @param string  $name
-     * @TODO: Use esi for this method
+     *
+     * @return RedirectResponse|Response
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
      */
     public function testAction(Request $request, $name)
     {
@@ -67,6 +77,7 @@ class CertyController extends Controller
 //        }
 
         if ($certification = $certificationHandler->process($certification)) {
+
             $router = $this->container->get('router');
 
             return new RedirectResponse(
@@ -87,17 +98,20 @@ class CertyController extends Controller
 
     /**
      * @param Request $request
+     *
+     * @return Response
+     * @throws \Certificationy\Bundle\CertyBundle\Exception\CheaterException
      */
     public function reportAction(Request $request)
     {
         $certification = $request->getSession()->get('certification');
 
-        //Prevent sneaky people.
-        $request->getSession()->remove('certification');
-
-        if (null === $certification) {
-            throw new CheaterException;
-        }
+//        //Prevent sneaky people.
+//        $request->getSession()->remove('certification');
+//
+//        if (null === $certification) {
+//            throw new CheaterException;
+//        }
 
         return $this->render('CertificationyCertyBundle:Certification:report.html.twig', array(
             'certification' => $certification
